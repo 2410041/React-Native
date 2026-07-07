@@ -1,98 +1,193 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from "react";
+import {
+	SafeAreaView,
+	ScrollView,
+	StyleSheet,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const popularItems = ["牛乳", "卵", "ラップ", "洗剤", "お菓子", "ティッシュ"];
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+	const [keyword, setKeyword] = useState("");
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+	return (
+		<SafeAreaView style={styles.safeArea}>
+			<ScrollView contentContainerStyle={styles.container}>
+				<View style={styles.header}>
+					<Text style={styles.logo}>Urinavi</Text>
+					<Text style={styles.subTitle}>売り場をすばやく案内します</Text>
+				</View>
+
+				<View style={styles.searchBox}>
+					<Text style={styles.sectionTitle}>商品を検索</Text>
+
+					<TextInput
+						style={styles.input}
+						placeholder="商品名・キーワードを入力"
+						value={keyword}
+						onChangeText={setKeyword}
+					/>
+
+					<TouchableOpacity style={styles.searchButton}>
+						<Text style={styles.searchButtonText}>検索する</Text>
+					</TouchableOpacity>
+				</View>
+
+				<View style={styles.card}>
+					<Text style={styles.sectionTitle}>よく探される商品</Text>
+
+					<View style={styles.chipArea}>
+						{popularItems.map((item) => (
+							<TouchableOpacity key={item} style={styles.chip}>
+								<Text style={styles.chipText}>{item}</Text>
+							</TouchableOpacity>
+						))}
+					</View>
+				</View>
+
+				<TouchableOpacity style={styles.mapCard}>
+					<View>
+						<Text style={styles.mapTitle}>店内マップを見る</Text>
+						<Text style={styles.mapText}>
+							通路番号・売場名・目印から場所を確認できます
+						</Text>
+					</View>
+					<Text style={styles.arrow}>›</Text>
+				</TouchableOpacity>
+
+				<View style={styles.notice}>
+					<Text style={styles.noticeTitle}>売り場にない商品について</Text>
+					<Text style={styles.noticeText}>
+						商品によっては季節限定・在庫切れ・取り扱い終了の場合があります。
+					</Text>
+				</View>
+			</ScrollView>
+		</SafeAreaView>
+	);
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+	safeArea: {
+		flex: 1,
+		backgroundColor: "#F2FAF5",
+	},
+	container: {
+		padding: 20,
+		paddingBottom: 40,
+	},
+	header: {
+		marginTop: 20,
+		marginBottom: 24,
+	},
+	logo: {
+		fontSize: 36,
+		fontWeight: "800",
+		color: "#15803D",
+	},
+	subTitle: {
+		marginTop: 8,
+		fontSize: 15,
+		color: "#4B5563",
+	},
+	searchBox: {
+		backgroundColor: "#FFFFFF",
+		borderRadius: 20,
+		padding: 18,
+		marginBottom: 18,
+		shadowColor: "#000",
+		shadowOpacity: 0.08,
+		shadowRadius: 10,
+		elevation: 3,
+	},
+	sectionTitle: {
+		fontSize: 18,
+		fontWeight: "700",
+		color: "#111827",
+		marginBottom: 12,
+	},
+	input: {
+		backgroundColor: "#F3F4F6",
+		borderRadius: 14,
+		paddingHorizontal: 14,
+		paddingVertical: 12,
+		fontSize: 16,
+		marginBottom: 12,
+	},
+	searchButton: {
+		backgroundColor: "#16A34A",
+		borderRadius: 14,
+		paddingVertical: 14,
+		alignItems: "center",
+	},
+	searchButtonText: {
+		color: "#FFFFFF",
+		fontSize: 16,
+		fontWeight: "700",
+	},
+	card: {
+		backgroundColor: "#FFFFFF",
+		borderRadius: 20,
+		padding: 18,
+		marginBottom: 18,
+	},
+	chipArea: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		gap: 10,
+	},
+	chip: {
+		backgroundColor: "#DCFCE7",
+		paddingHorizontal: 14,
+		paddingVertical: 9,
+		borderRadius: 999,
+	},
+	chipText: {
+		color: "#166534",
+		fontWeight: "600",
+	},
+	mapCard: {
+		backgroundColor: "#14532D",
+		borderRadius: 20,
+		padding: 18,
+		marginBottom: 18,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+	},
+	mapTitle: {
+		fontSize: 18,
+		fontWeight: "700",
+		color: "#FFFFFF",
+		marginBottom: 6,
+	},
+	mapText: {
+		color: "#DCFCE7",
+		fontSize: 13,
+		lineHeight: 20,
+		maxWidth: 250,
+	},
+	arrow: {
+		color: "#FFFFFF",
+		fontSize: 36,
+	},
+	notice: {
+		backgroundColor: "#ECFDF5",
+		borderRadius: 16,
+		padding: 16,
+		borderWidth: 1,
+		borderColor: "#BBF7D0",
+	},
+	noticeTitle: {
+		fontWeight: "700",
+		color: "#166534",
+		marginBottom: 6,
+	},
+	noticeText: {
+		color: "#374151",
+		lineHeight: 20,
+	},
 });
