@@ -573,7 +573,7 @@ JANコード：4900000000000
 - Node.js / Express
 - PHP
 - Firebase
-- Supabase
+- AWS RDS
 - MySQL
 
 ### 初期版のおすすめ構成
