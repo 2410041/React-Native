@@ -1,93 +1,89 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader } from "@/components/AppHeader";
 import { LocationCard } from "@/components/LocationCard";
-import { Colors, Gradients } from "@/constants/colors";
-import { getProductById } from "@/constants/mockData";
-import { StockLevel } from "@/types/product";
+import { PrimaryButton } from "@/components/PrimaryButton";
+import { StatusBadge } from "@/components/StatusBadge";
+import { getHandlingStatusMeta, getStockStatusMeta } from "@/components/statusMeta";
+import { Colors } from "@/constants/colors";
+import { useApp } from "@/context/AppContext";
+import { getDepartmentName } from "@/data/departments";
+import { getProductById } from "@/data/products";
 
-function stockColor(level: StockLevel) {
-	switch (level) {
-		case "あり":
-			return Colors.success;
-		case "少ない":
-			return Colors.warning;
-		default:
-			return Colors.gray;
-	}
+function formatDateTime(iso: string): string {
+	const date = new Date(iso);
+	return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${String(
+		date.getHours()
+	).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
 export default function ProductDetailScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const product = getProductById(id);
+	const { addHistory } = useApp();
+
+	useEffect(() => {
+		if (product) {
+			addHistory(product.id);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [product?.id]);
 
 	if (!product) {
 		return <Redirect href="/search" />;
 	}
 
+	const stockMeta = getStockStatusMeta(product.stock);
+	const backyardMeta = getStockStatusMeta(product.backyardStock);
+	const handlingMeta = getHandlingStatusMeta(product.handlingStatus);
+
 	return (
 		<View style={styles.screen}>
-			<AppHeader title="商品結果" />
+			<AppHeader title="商品詳細" />
 
-			<ScrollView contentContainerStyle={styles.content}>
+			<ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 				<View style={styles.iconWrap}>
 					<Ionicons name="cube" size={56} color={Colors.primary} />
 				</View>
 				<Text style={styles.name}>{product.name}</Text>
+				<Text style={styles.jan}>JANコード：{product.janCode}</Text>
+				<Text style={styles.department}>{getDepartmentName(product.departmentCode)}</Text>
+
+				<View style={styles.statusRow}>
+					<StatusBadge meta={handlingMeta} />
+				</View>
 
 				<LocationCard
-					aisleNumber={product.aisleNumber}
-					sectionName={product.sectionName}
-					landmark={product.landmark}
+					title="商品がおいている場所"
+					aisleNumber={product.location.aisleNumber}
+					sectionName={product.location.sectionName}
+					landmark={product.location.landmark}
 				/>
 
 				<View style={styles.stockCard}>
 					<View style={styles.stockRow}>
 						<Text style={styles.stockLabel}>在庫</Text>
-						<View
-							style={[
-								styles.badge,
-								{ backgroundColor: stockColor(product.stock) + "22" },
-							]}>
-							<Text style={[styles.badgeText, { color: stockColor(product.stock) }]}>
-								{product.stock}
-							</Text>
-						</View>
+						<StatusBadge meta={stockMeta} />
 					</View>
 					<View style={styles.stockRow}>
 						<Text style={styles.stockLabel}>バックヤード在庫</Text>
-						<View
-							style={[
-								styles.badge,
-								{ backgroundColor: stockColor(product.backyardStock) + "22" },
-							]}>
-							<Text
-								style={[
-									styles.badgeText,
-									{ color: stockColor(product.backyardStock) },
-								]}>
-								{product.backyardStock}
-							</Text>
-						</View>
+						<StatusBadge meta={backyardMeta} />
+					</View>
+					<View style={styles.divider} />
+					<View style={styles.stockRow}>
+						<Text style={styles.updatedLabel}>最終更新日時</Text>
+						<Text style={styles.updatedValue}>{formatDateTime(product.updatedAt)}</Text>
 					</View>
 				</View>
 
-				<TouchableOpacity
-					activeOpacity={0.85}
-					style={styles.mapButtonWrapper}
-					onPress={() => router.push(`/map/${product.id}`)}>
-					<LinearGradient
-						colors={Gradients.primary}
-						start={{ x: 0, y: 0 }}
-						end={{ x: 1, y: 1 }}
-						style={styles.mapButton}>
-						<Ionicons name="map" size={20} color={Colors.white} />
-						<Text style={styles.mapButtonText}>売場マップで確認</Text>
-					</LinearGradient>
-				</TouchableOpacity>
+				<PrimaryButton
+					label="売場マップで確認"
+					icon="map"
+					onPress={() => router.push(`/map/${product.id}`)}
+				/>
 			</ScrollView>
 		</View>
 	);
@@ -117,8 +113,22 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		fontWeight: "800",
 		color: Colors.text,
-		marginBottom: 20,
 		textAlign: "center",
+	},
+	jan: {
+		fontSize: 12,
+		color: Colors.textMuted,
+		marginTop: 6,
+	},
+	department: {
+		fontSize: 13,
+		fontWeight: "600",
+		color: Colors.textSub,
+		marginTop: 4,
+	},
+	statusRow: {
+		marginTop: 12,
+		marginBottom: 20,
 	},
 	stockCard: {
 		width: "100%",
@@ -138,30 +148,18 @@ const styles = StyleSheet.create({
 		color: Colors.textSub,
 		fontWeight: "600",
 	},
-	badge: {
-		paddingHorizontal: 14,
-		paddingVertical: 5,
-		borderRadius: 999,
+	divider: {
+		height: 1,
+		backgroundColor: Colors.border,
+		marginBottom: 12,
 	},
-	badgeText: {
+	updatedLabel: {
 		fontSize: 13,
-		fontWeight: "700",
+		color: Colors.textMuted,
 	},
-	mapButtonWrapper: {
-		width: "100%",
-		borderRadius: 16,
-		overflow: "hidden",
-	},
-	mapButton: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "center",
-		gap: 8,
-		paddingVertical: 16,
-	},
-	mapButtonText: {
-		color: Colors.white,
-		fontSize: 16,
-		fontWeight: "700",
+	updatedValue: {
+		fontSize: 13,
+		color: Colors.textSub,
+		fontWeight: "600",
 	},
 });

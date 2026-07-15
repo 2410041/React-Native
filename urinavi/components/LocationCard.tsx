@@ -27,12 +27,16 @@ export function LocationCard({
 			<View style={styles.row}>
 				<Ionicons name="storefront" size={18} color={Colors.primary} />
 				<Text style={styles.label}>売場名：</Text>
-				<Text style={styles.value}>{sectionName}</Text>
+				<Text style={styles.value} numberOfLines={2}>
+					{sectionName}
+				</Text>
 			</View>
 			<View style={styles.row}>
-				<Ionicons name="snow" size={18} color={Colors.primary} />
+				<Ionicons name="flag" size={18} color={Colors.primary} />
 				<Text style={styles.label}>目印：</Text>
-				<Text style={styles.value}>{landmark}</Text>
+				<Text style={[styles.value, styles.valueFlex]} numberOfLines={2}>
+					{landmark}
+				</Text>
 			</View>
 		</View>
 	);
@@ -44,6 +48,7 @@ const styles = StyleSheet.create({
 		borderRadius: 18,
 		padding: 18,
 		marginBottom: 16,
+		width: "100%",
 	},
 	cardTitle: {
 		fontSize: 16,
@@ -65,5 +70,8 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		fontWeight: "700",
 		color: Colors.text,
+	},
+	valueFlex: {
+		flex: 1,
 	},
 });

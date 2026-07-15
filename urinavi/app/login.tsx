@@ -3,8 +3,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+	Keyboard,
 	KeyboardAvoidingView,
 	Platform,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -14,19 +16,30 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Colors, Gradients } from "@/constants/colors";
+import { useApp } from "@/context/AppContext";
 
 export default function LoginScreen() {
+	const { login } = useApp();
 	const [employeeNumber, setEmployeeNumber] = useState("");
 	const [error, setError] = useState<string | null>(null);
 
+	const trimmed = employeeNumber.trim();
+	const canSubmit = trimmed.length > 0;
+
+	function handleChangeText(text: string) {
+		const digitsOnly = text.replace(/[^0-9]/g, "");
+		setEmployeeNumber(digitsOnly);
+		if (error) setError(null);
+	}
+
 	function handleLogin() {
-		const trimmed = employeeNumber.trim();
 		if (!trimmed) {
-			setError("直番を入力してください");
+			setError("責番を入力してください");
 			return;
 		}
-		if (!/^\d+$/.test(trimmed)) {
-			setError("直番は数字で入力してください");
+		const success = login(trimmed);
+		if (!success) {
+			setError("該当する責番が見つかりません。入力内容をご確認ください");
 			return;
 		}
 		setError(null);
@@ -37,55 +50,72 @@ export default function LoginScreen() {
 		<SafeAreaView style={styles.safeArea}>
 			<KeyboardAvoidingView
 				style={styles.flex}
-				behavior={Platform.OS === "ios" ? "padding" : undefined}>
-				<View style={styles.container}>
-					<View style={styles.logoArea}>
-						<View style={styles.logoCircle}>
-							<Ionicons name="cart" size={40} color={Colors.primary} />
+				behavior={Platform.OS === "ios" ? "padding" : undefined}
+				keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}>
+				<ScrollView
+					contentContainerStyle={styles.scrollContent}
+					keyboardShouldPersistTaps="handled"
+					onScrollBeginDrag={Keyboard.dismiss}
+					showsVerticalScrollIndicator={false}>
+					<View style={styles.container}>
+						<View style={styles.logoArea}>
+							<View style={styles.logoCircle}>
+								<Ionicons name="cart" size={40} color={Colors.primary} />
+							</View>
+							<Text style={styles.appName}>Urinavi</Text>
+							<Text style={styles.appSub}>従業員用</Text>
 						</View>
-						<Text style={styles.appName}>Urinavi</Text>
-						<Text style={styles.appSub}>従業員用</Text>
+
+						<View style={styles.formCard}>
+							<Text style={styles.formTitle}>責番でログイン</Text>
+
+							<Text style={styles.label}>責番</Text>
+							<TextInput
+								style={[styles.input, error && styles.inputError]}
+								placeholder="67"
+								placeholderTextColor={Colors.textMuted}
+								keyboardType="number-pad"
+								returnKeyType="done"
+								value={employeeNumber}
+								onChangeText={handleChangeText}
+								onSubmitEditing={handleLogin}
+								accessibilityLabel="責番入力欄"
+								accessibilityHint="配布された責番を数字で入力してください"
+								maxLength={6}
+							/>
+							<Text style={styles.hint}>配布された責番を入力してください</Text>
+							{error && (
+								<Text style={styles.errorText} accessibilityLiveRegion="polite">
+									{error}
+								</Text>
+							)}
+
+							<TouchableOpacity
+								activeOpacity={0.85}
+								onPress={handleLogin}
+								disabled={!canSubmit}
+								accessibilityRole="button"
+								accessibilityLabel="ログイン"
+								accessibilityState={{ disabled: !canSubmit }}
+								style={styles.loginButtonWrapper}>
+								<LinearGradient
+									colors={canSubmit ? Gradients.primary : [Colors.gray, Colors.textMuted]}
+									start={{ x: 0, y: 0 }}
+									end={{ x: 1, y: 1 }}
+									style={styles.loginButton}>
+									<Text style={styles.loginButtonText}>ログイン</Text>
+								</LinearGradient>
+							</TouchableOpacity>
+						</View>
 					</View>
 
-					<View style={styles.formCard}>
-						<Text style={styles.formTitle}>直番でログイン</Text>
-
-						<Text style={styles.label}>直番</Text>
-						<TextInput
-							style={[styles.input, error && styles.inputError]}
-							placeholder="67"
-							placeholderTextColor={Colors.textMuted}
-							keyboardType="number-pad"
-							value={employeeNumber}
-							onChangeText={(text) => {
-								setEmployeeNumber(text);
-								if (error) setError(null);
-							}}
-						/>
-						<Text style={styles.hint}>配布された直番を入力してください</Text>
-						{error && <Text style={styles.errorText}>{error}</Text>}
-
-						<TouchableOpacity
-							activeOpacity={0.85}
-							onPress={handleLogin}
-							style={styles.loginButtonWrapper}>
-							<LinearGradient
-								colors={Gradients.primary}
-								start={{ x: 0, y: 0 }}
-								end={{ x: 1, y: 1 }}
-								style={styles.loginButton}>
-								<Text style={styles.loginButtonText}>ログイン</Text>
-							</LinearGradient>
-						</TouchableOpacity>
+					<View style={styles.decoration}>
+						<View style={styles.storeBuilding}>
+							<Ionicons name="storefront" size={30} color={Colors.primary} />
+							<Text style={styles.storeText}>SUPER MARKET</Text>
+						</View>
 					</View>
-				</View>
-
-				<View style={styles.decoration}>
-					<View style={styles.storeBuilding}>
-						<Ionicons name="storefront" size={30} color={Colors.primary} />
-						<Text style={styles.storeText}>SUPER MARKET</Text>
-					</View>
-				</View>
+				</ScrollView>
 			</KeyboardAvoidingView>
 		</SafeAreaView>
 	);
@@ -98,6 +128,9 @@ const styles = StyleSheet.create({
 	},
 	flex: {
 		flex: 1,
+	},
+	scrollContent: {
+		flexGrow: 1,
 		justifyContent: "space-between",
 	},
 	container: {
@@ -160,6 +193,7 @@ const styles = StyleSheet.create({
 		fontWeight: "700",
 		color: Colors.text,
 		backgroundColor: Colors.grayBg,
+		minHeight: 52,
 	},
 	inputError: {
 		borderColor: Colors.danger,
@@ -184,6 +218,8 @@ const styles = StyleSheet.create({
 		paddingVertical: 16,
 		alignItems: "center",
 		borderRadius: 16,
+		minHeight: 52,
+		justifyContent: "center",
 	},
 	loginButtonText: {
 		color: Colors.white,

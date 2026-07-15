@@ -1,21 +1,28 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
+import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BottomNav } from "@/components/BottomNav";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { Colors, Gradients } from "@/constants/colors";
-import { mockEmployee } from "@/constants/mockData";
+import { useApp } from "@/context/AppContext";
+import { getDepartmentName } from "@/data/departments";
 
-const menuItems: { icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
-	{ icon: "person-circle-outline", label: "従業員情報" },
-	{ icon: "storefront-outline", label: "店舗情報" },
-	{ icon: "settings-outline", label: "設定" },
-	{ icon: "help-circle-outline", label: "ヘルプ" },
+const menuItems: { icon: keyof typeof Ionicons.glyphMap; label: string; href: Href }[] = [
+	{ icon: "person-circle-outline", label: "従業員情報", href: "/employee" },
+	{ icon: "storefront-outline", label: "店舗情報", href: "/store" },
+	{ icon: "settings-outline", label: "設定", href: "/settings" },
+	{ icon: "help-circle-outline", label: "ヘルプ", href: "/help" },
+	{ icon: "information-circle-outline", label: "アプリ情報", href: "/about" },
 ];
 
 export default function MenuScreen() {
+	const { employee, store, logout } = useApp();
+	const [confirmVisible, setConfirmVisible] = useState(false);
+
 	return (
 		<View style={styles.screen}>
 			<LinearGradient colors={Gradients.header} style={styles.header}>
@@ -29,16 +36,25 @@ export default function MenuScreen() {
 					<View style={styles.avatar}>
 						<Ionicons name="person" size={28} color={Colors.primary} />
 					</View>
-					<View>
-						<Text style={styles.profileName}>
-							{mockEmployee.name}さん（{mockEmployee.employeeNumber}番）
+					<View style={styles.profileText}>
+						<Text style={styles.profileName} numberOfLines={1}>
+							{employee?.name}さん（{employee?.employeeNumber}番）
 						</Text>
-						<Text style={styles.profileStore}>{mockEmployee.storeName}</Text>
+						<Text style={styles.profileStore} numberOfLines={1}>
+							{store?.name}
+							{employee ? ` ／ ${getDepartmentName(employee.normalDepartmentCode)}` : ""}
+						</Text>
 					</View>
 				</View>
 
 				{menuItems.map((item) => (
-					<TouchableOpacity key={item.label} style={styles.menuRow} activeOpacity={0.7}>
+					<TouchableOpacity
+						key={item.label}
+						style={styles.menuRow}
+						activeOpacity={0.7}
+						onPress={() => router.push(item.href)}
+						accessibilityRole="button"
+						accessibilityLabel={item.label}>
 						<Ionicons name={item.icon} size={20} color={Colors.textSub} />
 						<Text style={styles.menuLabel}>{item.label}</Text>
 						<Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
@@ -48,11 +64,27 @@ export default function MenuScreen() {
 				<TouchableOpacity
 					style={styles.logoutButton}
 					activeOpacity={0.7}
-					onPress={() => router.replace("/login")}>
+					onPress={() => setConfirmVisible(true)}
+					accessibilityRole="button"
+					accessibilityLabel="ログアウト">
 					<Ionicons name="log-out-outline" size={20} color={Colors.danger} />
 					<Text style={styles.logoutText}>ログアウト</Text>
 				</TouchableOpacity>
 			</View>
+
+			<ConfirmModal
+				visible={confirmVisible}
+				title="ログアウトしますか？"
+				message="ログイン画面に戻ります。"
+				confirmLabel="ログアウト"
+				destructive
+				onConfirm={() => {
+					setConfirmVisible(false);
+					logout();
+					router.replace("/login");
+				}}
+				onCancel={() => setConfirmVisible(false)}
+			/>
 
 			<BottomNav active="menu" />
 		</View>
@@ -97,6 +129,9 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
+	profileText: {
+		flex: 1,
+	},
 	profileName: {
 		fontSize: 16,
 		fontWeight: "700",
@@ -116,6 +151,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 14,
 		paddingHorizontal: 16,
 		marginBottom: 10,
+		minHeight: 52,
 	},
 	menuLabel: {
 		flex: 1,
@@ -130,6 +166,7 @@ const styles = StyleSheet.create({
 		gap: 8,
 		marginTop: 16,
 		paddingVertical: 14,
+		minHeight: 48,
 		borderRadius: 14,
 		borderWidth: 1,
 		borderColor: Colors.danger,

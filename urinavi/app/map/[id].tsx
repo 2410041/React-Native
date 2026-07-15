@@ -1,11 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Redirect, useLocalSearchParams } from "expo-router";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Redirect, router, useLocalSearchParams } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader } from "@/components/AppHeader";
 import { LocationCard } from "@/components/LocationCard";
+import { SecondaryButton } from "@/components/SecondaryButton";
 import { Colors } from "@/constants/colors";
-import { getProductById } from "@/constants/mockData";
+import { getProductById } from "@/data/products";
+
+const MAP_MIN_WIDTH = 320;
 
 export default function MapScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
@@ -19,64 +22,64 @@ export default function MapScreen() {
 		<View style={styles.screen}>
 			<AppHeader title="商品の場所案内" />
 
-			<ScrollView contentContainerStyle={styles.content}>
+			<ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 				<Text style={styles.name}>{product.name}</Text>
 
 				<LocationCard
 					title="商品の場所はこちら"
-					aisleNumber={product.aisleNumber}
-					sectionName={product.sectionName}
-					landmark={product.landmark}
+					aisleNumber={product.location.aisleNumber}
+					sectionName={product.location.sectionName}
+					landmark={product.location.landmark}
 				/>
 
-				<View style={styles.mapCard}>
-					<View style={styles.mapTopRow}>
-						<View style={styles.mapZone}>
-							<Text style={styles.zoneText}>青果</Text>
-						</View>
-						<View style={styles.mapZone}>
-							<Text style={styles.zoneText}>鮮魚</Text>
-						</View>
-						<View style={styles.mapZone}>
-							<Text style={styles.zoneText}>惣菜</Text>
-						</View>
-					</View>
-
-					<View style={styles.mapMidRow}>
-						<View style={styles.aisleColumn}>
-							<View style={styles.aisleCircle}>
-								<Text style={styles.aisleCircleText}>{product.aisleNumber}</Text>
+				<ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.mapScroll}>
+					<View style={styles.mapCard}>
+						<View style={styles.mapTopRow}>
+							<View style={styles.mapZone}>
+								<Text style={styles.zoneText}>青果</Text>
+							</View>
+							<View style={styles.mapZone}>
+								<Text style={styles.zoneText}>鮮魚</Text>
+							</View>
+							<View style={styles.mapZone}>
+								<Text style={styles.zoneText}>惣菜</Text>
 							</View>
 						</View>
 
-						<View style={styles.beverageZone}>
-							<Text style={styles.zoneText}>飲料売場</Text>
-							<View style={styles.pin}>
-								<Ionicons name="location" size={26} color={Colors.danger} />
+						<View style={styles.mapMidRow}>
+							<View style={styles.aisleColumn}>
+								<View style={styles.aisleCircle}>
+									<Text style={styles.aisleCircleText}>{product.location.aisleNumber}</Text>
+								</View>
+							</View>
+
+							<View style={styles.targetZone}>
+								<Text style={styles.zoneText} numberOfLines={1}>
+									{product.location.sectionName}
+								</Text>
+								<View style={styles.pin}>
+									<Ionicons name="location" size={26} color={Colors.danger} />
+								</View>
+							</View>
+
+							<View style={styles.routeArea}>
+								{[0, 1, 2, 3].map((i) => (
+									<View key={i} style={styles.dot} />
+								))}
+							</View>
+
+							<View style={styles.registerZone}>
+								<Text style={styles.zoneTextVertical}>レジ</Text>
+								<Ionicons name="cart" size={18} color={Colors.primary} style={styles.cartIcon} />
 							</View>
 						</View>
 
-						<View style={styles.routeArea}>
-							{[0, 1, 2, 3].map((i) => (
-								<View key={i} style={styles.dot} />
-							))}
-						</View>
-
-						<View style={styles.registerZone}>
-							<Text style={styles.zoneTextVertical}>レジ</Text>
-							<Ionicons
-								name="snow"
-								size={18}
-								color={Colors.primary}
-								style={styles.snowIcon}
-							/>
+						<View style={styles.mapBottomRow}>
+							<Ionicons name="walk" size={16} color={Colors.textSub} />
+							<Text style={styles.entranceText}>入口（現在地の目安）</Text>
 						</View>
 					</View>
-
-					<View style={styles.mapBottomRow}>
-						<Text style={styles.entranceText}>入口</Text>
-					</View>
-				</View>
+				</ScrollView>
 
 				<View style={styles.noteCard}>
 					<Text style={styles.noteTitle}>ご案内・メモ</Text>
@@ -86,12 +89,29 @@ export default function MapScreen() {
 							<Text style={styles.noteText}>{note}</Text>
 						</View>
 					))}
+					{product.location.nearbyProducts.length > 0 && (
+						<View style={styles.noteRow}>
+							<Ionicons name="cube-outline" size={16} color={Colors.primary} />
+							<Text style={styles.noteText}>
+								近くの商品：{product.location.nearbyProducts.join("、")}
+							</Text>
+						</View>
+					)}
+					{product.location.nearbyFacilities.length > 0 && (
+						<View style={styles.noteRow}>
+							<Ionicons name="business-outline" size={16} color={Colors.primary} />
+							<Text style={styles.noteText}>
+								近くの設備：{product.location.nearbyFacilities.join("、")}
+							</Text>
+						</View>
+					)}
 				</View>
 
-				<TouchableOpacity activeOpacity={0.85} style={styles.confirmButton}>
-					<Ionicons name="map" size={20} color={Colors.white} />
-					<Text style={styles.confirmButtonText}>マップで確認</Text>
-				</TouchableOpacity>
+				<SecondaryButton
+					label="店舗全体マップを見る"
+					icon="map-outline"
+					onPress={() => router.push("/map/store")}
+				/>
 			</ScrollView>
 		</View>
 	);
@@ -112,11 +132,15 @@ const styles = StyleSheet.create({
 		color: Colors.text,
 		marginBottom: 16,
 	},
+	mapScroll: {
+		marginBottom: 16,
+	},
 	mapCard: {
+		width: "100%",
+		minWidth: MAP_MIN_WIDTH,
 		backgroundColor: Colors.surface,
 		borderRadius: 18,
 		padding: 14,
-		marginBottom: 16,
 		borderWidth: 1,
 		borderColor: Colors.border,
 	},
@@ -160,11 +184,12 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		fontWeight: "800",
 	},
-	beverageZone: {
+	targetZone: {
 		flex: 2,
 		backgroundColor: Colors.primaryLight,
 		borderRadius: 10,
 		paddingVertical: 30,
+		paddingHorizontal: 6,
 		alignItems: "center",
 		justifyContent: "center",
 		gap: 4,
@@ -198,11 +223,14 @@ const styles = StyleSheet.create({
 		fontWeight: "700",
 		color: Colors.textSub,
 	},
-	snowIcon: {
+	cartIcon: {
 		marginTop: 2,
 	},
 	mapBottomRow: {
+		flexDirection: "row",
 		alignItems: "center",
+		justifyContent: "center",
+		gap: 6,
 		paddingVertical: 10,
 		borderTopWidth: 1,
 		borderTopColor: Colors.border,
@@ -217,38 +245,24 @@ const styles = StyleSheet.create({
 		backgroundColor: Colors.primaryLight,
 		borderRadius: 16,
 		padding: 16,
-		marginBottom: 24,
+		marginBottom: 20,
+		gap: 8,
 	},
 	noteTitle: {
 		fontSize: 15,
 		fontWeight: "700",
 		color: Colors.primary,
-		marginBottom: 10,
+		marginBottom: 4,
 	},
 	noteRow: {
 		flexDirection: "row",
 		alignItems: "flex-start",
 		gap: 8,
-		marginBottom: 8,
 	},
 	noteText: {
 		flex: 1,
 		fontSize: 13,
 		color: Colors.text,
 		lineHeight: 19,
-	},
-	confirmButton: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "center",
-		gap: 8,
-		backgroundColor: Colors.primary,
-		borderRadius: 16,
-		paddingVertical: 16,
-	},
-	confirmButtonText: {
-		color: Colors.white,
-		fontSize: 16,
-		fontWeight: "700",
 	},
 });

@@ -12,6 +12,7 @@ type AppHeaderProps = {
 	onBack?: () => void;
 	rightIcon?: keyof typeof Ionicons.glyphMap;
 	onRightPress?: () => void;
+	rightAccessibilityLabel?: string;
 };
 
 export function AppHeader({
@@ -20,6 +21,7 @@ export function AppHeader({
 	onBack,
 	rightIcon,
 	onRightPress,
+	rightAccessibilityLabel,
 }: AppHeaderProps) {
 	return (
 		<LinearGradient colors={Gradients.header} style={styles.gradient}>
@@ -30,7 +32,9 @@ export function AppHeader({
 							<TouchableOpacity
 								onPress={onBack ?? (() => router.back())}
 								hitSlop={12}
-								style={styles.iconButton}>
+								style={styles.iconButton}
+								accessibilityRole="button"
+								accessibilityLabel="戻る">
 								<Ionicons name="chevron-back" size={26} color={Colors.white} />
 							</TouchableOpacity>
 						)}
@@ -43,7 +47,9 @@ export function AppHeader({
 							<TouchableOpacity
 								onPress={onRightPress}
 								hitSlop={12}
-								style={styles.iconButton}>
+								style={styles.iconButton}
+								accessibilityRole="button"
+								accessibilityLabel={rightAccessibilityLabel ?? "その他の操作"}>
 								<Ionicons name={rightIcon} size={24} color={Colors.white} />
 							</TouchableOpacity>
 						)}

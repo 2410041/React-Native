@@ -1,67 +1,63 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+import { StatusBadge } from "@/components/StatusBadge";
+import { getHandlingStatusMeta, getStockStatusMeta } from "@/components/statusMeta";
 import { Colors } from "@/constants/colors";
-import { Product, StockLevel } from "@/types/product";
+import { getDepartmentName } from "@/data/departments";
+import { Product } from "@/types/product";
 
 type ProductCardProps = {
 	product: Product;
 	onPress?: () => void;
 };
 
-function stockBadgeStyle(level: StockLevel) {
-	switch (level) {
-		case "あり":
-			return { backgroundColor: Colors.successBg, color: Colors.success };
-		case "少ない":
-			return { backgroundColor: Colors.warningBg, color: Colors.warning };
-		case "なし":
-		default:
-			return { backgroundColor: Colors.grayBg, color: Colors.gray };
-	}
-}
-
-function StockBadge({ label, level }: { label: string; level: StockLevel }) {
-	const badge = stockBadgeStyle(level);
-	return (
-		<View style={styles.stockRow}>
-			<Text style={styles.stockLabel}>{label}</Text>
-			<View style={[styles.badge, { backgroundColor: badge.backgroundColor }]}>
-				<Text style={[styles.badgeText, { color: badge.color }]}>{level}</Text>
-			</View>
-		</View>
-	);
-}
-
 export function ProductCard({ product, onPress }: ProductCardProps) {
+	const stockMeta = getStockStatusMeta(product.stock);
+	const handlingMeta = getHandlingStatusMeta(product.handlingStatus);
+
 	return (
-		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+		<TouchableOpacity
+			style={styles.card}
+			onPress={onPress}
+			activeOpacity={0.7}
+			accessibilityRole="button"
+			accessibilityLabel={`${product.name}の詳細を見る`}>
 			<View style={styles.headerRow}>
 				<View style={styles.iconCircle}>
 					<Ionicons name="cube" size={22} color={Colors.primary} />
 				</View>
-				<Text style={styles.name} numberOfLines={2}>
-					{product.name}
-				</Text>
+				<View style={styles.headerText}>
+					<Text style={styles.name} numberOfLines={2}>
+						{product.name}
+					</Text>
+					<Text style={styles.department}>{getDepartmentName(product.departmentCode)}</Text>
+				</View>
 			</View>
 
 			<View style={styles.infoRow}>
 				<Ionicons name="location-outline" size={15} color={Colors.textSub} />
-				<Text style={styles.infoText}>通路番号：{product.aisleNumber}</Text>
+				<Text style={styles.infoText}>通路番号：{product.location.aisleNumber}</Text>
 			</View>
 			<View style={styles.infoRow}>
 				<Ionicons name="storefront-outline" size={15} color={Colors.textSub} />
-				<Text style={styles.infoText}>売場名：{product.sectionName}</Text>
+				<Text style={styles.infoText} numberOfLines={1}>
+					売場名：{product.location.sectionName}
+				</Text>
 			</View>
 			<View style={styles.infoRow}>
-				<Ionicons name="snow-outline" size={15} color={Colors.textSub} />
-				<Text style={styles.infoText}>目印：{product.landmark}</Text>
+				<Ionicons name="flag-outline" size={15} color={Colors.textSub} />
+				<Text style={styles.infoText} numberOfLines={1}>
+					目印：{product.location.landmark}
+				</Text>
 			</View>
 
 			<View style={styles.divider} />
 
-			<StockBadge label="在庫" level={product.stock} />
-			<StockBadge label="バックヤード在庫" level={product.backyardStock} />
+			<View style={styles.badgeRow}>
+				<StatusBadge meta={handlingMeta} size="small" />
+				<StatusBadge meta={stockMeta} size="small" />
+			</View>
 		</TouchableOpacity>
 	);
 }
@@ -92,11 +88,18 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	name: {
+	headerText: {
 		flex: 1,
+	},
+	name: {
 		fontSize: 16,
 		fontWeight: "700",
 		color: Colors.text,
+	},
+	department: {
+		fontSize: 12,
+		color: Colors.textMuted,
+		marginTop: 2,
 	},
 	infoRow: {
 		flexDirection: "row",
@@ -105,6 +108,7 @@ const styles = StyleSheet.create({
 		marginBottom: 6,
 	},
 	infoText: {
+		flex: 1,
 		fontSize: 13,
 		color: Colors.textSub,
 	},
@@ -113,23 +117,9 @@ const styles = StyleSheet.create({
 		backgroundColor: Colors.border,
 		marginVertical: 8,
 	},
-	stockRow: {
+	badgeRow: {
 		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-		marginBottom: 6,
-	},
-	stockLabel: {
-		fontSize: 13,
-		color: Colors.textSub,
-	},
-	badge: {
-		paddingHorizontal: 10,
-		paddingVertical: 3,
-		borderRadius: 999,
-	},
-	badgeText: {
-		fontSize: 12,
-		fontWeight: "700",
+		flexWrap: "wrap",
+		gap: 8,
 	},
 });
