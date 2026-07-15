@@ -11,7 +11,6 @@ const categoryMeta: Record<
 	important: { icon: "alert-circle", label: "重要" },
 	store: { icon: "storefront", label: "店舗" },
 	priceRevision: { icon: "pricetag", label: "価格改定" },
-	task: { icon: "clipboard", label: "タスク" },
 };
 
 function formatDateTime(iso: string): string {

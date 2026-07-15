@@ -38,7 +38,7 @@ export default function StoreMapScreen() {
 
 	return (
 		<View style={styles.screen}>
-			<AppHeader title="店舗全体マップ" />
+			<AppHeader title="店舗全体マップ" subtitle={store.name} />
 
 			<ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 				<Text style={styles.storeName}>{store.name}</Text>

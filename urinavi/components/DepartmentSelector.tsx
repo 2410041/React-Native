@@ -13,6 +13,7 @@ type DepartmentSelectorProps = {
 	includeAll?: boolean;
 	variant?: "chips" | "list";
 	normalDepartmentCode?: DepartmentCode;
+	excludeCodes?: DepartmentCode[];
 };
 
 export function DepartmentSelector({
@@ -21,10 +22,15 @@ export function DepartmentSelector({
 	includeAll = true,
 	variant = "chips",
 	normalDepartmentCode,
+	excludeCodes,
 }: DepartmentSelectorProps) {
+	const visibleDepartments = excludeCodes
+		? departments.filter((d) => !excludeCodes.includes(d.code))
+		: departments;
+
 	const options: { code: SelectedDepartment; name: string }[] = [
 		...(includeAll ? [{ code: "all" as SelectedDepartment, name: "すべての部門" }] : []),
-		...departments.map((d) => ({ code: d.code as SelectedDepartment, name: d.name })),
+		...visibleDepartments.map((d) => ({ code: d.code as SelectedDepartment, name: d.name })),
 	];
 
 	if (variant === "list") {

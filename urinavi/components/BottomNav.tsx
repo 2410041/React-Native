@@ -5,20 +5,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/colors";
 
-export type NavKey = "home" | "search" | "task" | "history" | "menu";
+export type NavKey = "home" | "search" | "history" | "menu";
 
 type NavItem = {
 	key: NavKey;
 	label: string;
 	icon: keyof typeof Ionicons.glyphMap;
 	iconActive: keyof typeof Ionicons.glyphMap;
-	href: "/home" | "/search" | "/task" | "/history" | "/menu";
+	href: "/home" | "/search" | "/history" | "/menu";
 };
 
 const items: NavItem[] = [
 	{ key: "home", label: "ホーム", icon: "home-outline", iconActive: "home", href: "/home" },
 	{ key: "search", label: "検索", icon: "search-outline", iconActive: "search", href: "/search" },
-	{ key: "task", label: "タスク", icon: "clipboard-outline", iconActive: "clipboard", href: "/task" },
 	{ key: "history", label: "履歴", icon: "time-outline", iconActive: "time", href: "/history" },
 	{ key: "menu", label: "メニュー", icon: "menu-outline", iconActive: "menu", href: "/menu" },
 ];

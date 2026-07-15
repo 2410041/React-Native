@@ -4,7 +4,6 @@ import { Colors } from "@/constants/colors";
 import { HandlingStatus } from "@/types/handlingStatus";
 import { PriceRevisionCheckState } from "@/types/priceRevision";
 import { StockStatus } from "@/types/stock";
-import { TaskPriority, TaskStatus } from "@/types/task";
 
 export type StatusTone = "success" | "warning" | "danger" | "neutral" | "info";
 
@@ -47,30 +46,6 @@ export function getHandlingStatusMeta(status: HandlingStatus): StatusMeta {
 		case "不明":
 		default:
 			return { label: "不明", tone: "neutral", icon: "help-circle" };
-	}
-}
-
-export function getTaskStatusMeta(status: TaskStatus): StatusMeta {
-	switch (status) {
-		case "未対応":
-			return { label: "未対応", tone: "danger", icon: "ellipse-outline" };
-		case "対応中":
-			return { label: "対応中", tone: "warning", icon: "sync-circle" };
-		case "完了":
-		default:
-			return { label: "完了", tone: "success", icon: "checkmark-circle" };
-	}
-}
-
-export function getTaskPriorityMeta(priority: TaskPriority): StatusMeta {
-	switch (priority) {
-		case "高":
-			return { label: "優先度：高", tone: "danger", icon: "arrow-up-circle" };
-		case "中":
-			return { label: "優先度：中", tone: "warning", icon: "remove-circle" };
-		case "低":
-		default:
-			return { label: "優先度：低", tone: "neutral", icon: "arrow-down-circle" };
 	}
 }
 

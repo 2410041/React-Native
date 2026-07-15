@@ -1,6 +1,6 @@
 import type { Href } from "expo-router";
 
-export type NotificationCategory = "store" | "priceRevision" | "task" | "important";
+export type NotificationCategory = "store" | "priceRevision" | "important";
 
 export type Notification = {
 	id: string;

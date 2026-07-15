@@ -1,9 +1,8 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { BackHandler, FlatList, Keyboard, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { DepartmentSelector, SelectedDepartment } from "@/components/DepartmentSelector";
 import { EmptyState } from "@/components/EmptyState";
@@ -12,7 +11,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { ProductCard } from "@/components/ProductCard";
 import { SearchInput } from "@/components/SearchInput";
 import { SectionTitle } from "@/components/SectionTitle";
-import { Colors, Gradients } from "@/constants/colors";
+import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { frequentProductIds } from "@/data/searchHistory";
 import { getProductById, searchProducts } from "@/data/products";
@@ -71,11 +70,7 @@ export default function SearchScreen() {
 
 	return (
 		<View style={styles.screen}>
-			<LinearGradient colors={Gradients.header} style={styles.header}>
-				<SafeAreaView edges={["top"]}>
-					<Text style={styles.headerTitle}>商品検索</Text>
-				</SafeAreaView>
-			</LinearGradient>
+			<AppHeader title="商品検索" subtitle="商品名・JANコードから探す" showBack={false} />
 
 			<View style={styles.searchArea}>
 				<View style={styles.modeRow}>
@@ -198,18 +193,6 @@ const styles = StyleSheet.create({
 	screen: {
 		flex: 1,
 		backgroundColor: Colors.background,
-	},
-	header: {
-		borderBottomLeftRadius: 28,
-		borderBottomRightRadius: 28,
-		paddingBottom: 16,
-	},
-	headerTitle: {
-		color: Colors.white,
-		fontSize: 22,
-		fontWeight: "800",
-		paddingHorizontal: 22,
-		paddingTop: 16,
 	},
 	searchArea: {
 		paddingHorizontal: 20,

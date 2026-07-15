@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Redirect, router } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -61,9 +62,13 @@ export default function PriceRevisionResultScreen() {
 
 	return (
 		<View style={styles.screen}>
-			<AppHeader title="照合結果" />
+			<AppHeader title="照合結果" subtitle={`対象 ${priceRevision.items.length}件`} />
 
 			<View style={styles.filterArea}>
+				<View style={styles.scopeNoteRow}>
+					<Ionicons name="information-circle-outline" size={14} color={Colors.textSub} />
+					<Text style={styles.scopeNoteText}>生鮮・総菜は価格改定チェックの対象外です</Text>
+				</View>
 				<SearchInput
 					value={keyword}
 					onChangeText={setKeyword}
@@ -71,7 +76,12 @@ export default function PriceRevisionResultScreen() {
 					accessibilityLabel="商品名またはJANコードで絞り込み"
 				/>
 				<View style={styles.departmentFilterWrap}>
-					<DepartmentSelector value={department} onChange={setDepartment} variant="chips" />
+					<DepartmentSelector
+						value={department}
+						onChange={setDepartment}
+						variant="chips"
+						excludeCodes={["fresh", "deli"]}
+					/>
 				</View>
 				<ScrollView
 					horizontal
@@ -127,6 +137,15 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingTop: 14,
 		gap: 10,
+	},
+	scopeNoteRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 6,
+	},
+	scopeNoteText: {
+		fontSize: 12,
+		color: Colors.textSub,
 	},
 	departmentFilterWrap: {
 		marginTop: 2,

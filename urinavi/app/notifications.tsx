@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useMemo } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 
 import { AppHeader } from "@/components/AppHeader";
 import { EmptyState } from "@/components/EmptyState";
@@ -32,23 +32,12 @@ export default function NotificationsScreen() {
 		<View style={styles.screen}>
 			<AppHeader
 				title="通知"
+				subtitle={unreadNotificationCount > 0 ? `未読 ${unreadNotificationCount}件` : "すべて既読"}
 				rightIcon={unreadNotificationCount > 0 ? "checkmark-done" : undefined}
 				onRightPress={markAllNotificationsRead}
 				rightAccessibilityLabel="すべて既読にする"
+				rightBadge={unreadNotificationCount > 0}
 			/>
-
-			{unreadNotificationCount > 0 && (
-				<View style={styles.actionRow}>
-					<Text style={styles.unreadText}>未読 {unreadNotificationCount}件</Text>
-					<TouchableOpacity
-						onPress={markAllNotificationsRead}
-						hitSlop={10}
-						accessibilityRole="button"
-						accessibilityLabel="すべて既読にする">
-						<Text style={styles.actionText}>すべて既読にする</Text>
-					</TouchableOpacity>
-				</View>
-			)}
 
 			<FlatList
 				data={sorted}
@@ -73,23 +62,6 @@ const styles = StyleSheet.create({
 	screen: {
 		flex: 1,
 		backgroundColor: Colors.background,
-	},
-	actionRow: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		paddingHorizontal: 20,
-		paddingTop: 14,
-	},
-	unreadText: {
-		fontSize: 13,
-		fontWeight: "700",
-		color: Colors.textSub,
-	},
-	actionText: {
-		fontSize: 13,
-		fontWeight: "700",
-		color: Colors.primary,
 	},
 	list: {
 		padding: 20,

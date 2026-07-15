@@ -30,7 +30,6 @@ export default function RootLayout() {
 					<Stack.Screen name="product/[id]" />
 					<Stack.Screen name="map/[id]" />
 					<Stack.Screen name="map/store" />
-					<Stack.Screen name="task" />
 					<Stack.Screen name="history" />
 					<Stack.Screen name="price-revision/index" />
 					<Stack.Screen name="price-revision/result" />

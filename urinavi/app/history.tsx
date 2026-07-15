@@ -1,14 +1,13 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { FlatList, StyleSheet, View } from "react-native";
 
+import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { EmptyState } from "@/components/EmptyState";
 import { ProductCard } from "@/components/ProductCard";
-import { Colors, Gradients } from "@/constants/colors";
+import { Colors } from "@/constants/colors";
 import { useApp, useRecentProducts } from "@/context/AppContext";
 
 export default function HistoryScreen() {
@@ -18,22 +17,14 @@ export default function HistoryScreen() {
 
 	return (
 		<View style={styles.screen}>
-			<LinearGradient colors={Gradients.header} style={styles.header}>
-				<SafeAreaView edges={["top"]}>
-					<View style={styles.headerRow}>
-						<Text style={styles.headerTitle}>最近見た商品</Text>
-						{recentProducts.length > 0 && (
-							<TouchableOpacity
-								onPress={() => setConfirmVisible(true)}
-								hitSlop={10}
-								accessibilityRole="button"
-								accessibilityLabel="履歴をすべて削除">
-								<Text style={styles.clearText}>すべて削除</Text>
-							</TouchableOpacity>
-						)}
-					</View>
-				</SafeAreaView>
-			</LinearGradient>
+			<AppHeader
+				title="最近見た商品"
+				subtitle={recentProducts.length > 0 ? `${recentProducts.length}件` : undefined}
+				showBack={false}
+				rightIcon={recentProducts.length > 0 ? "trash-outline" : undefined}
+				onRightPress={() => setConfirmVisible(true)}
+				rightAccessibilityLabel="履歴をすべて削除"
+			/>
 
 			<FlatList
 				data={recentProducts}
@@ -76,29 +67,6 @@ const styles = StyleSheet.create({
 	screen: {
 		flex: 1,
 		backgroundColor: Colors.background,
-	},
-	header: {
-		borderBottomLeftRadius: 28,
-		borderBottomRightRadius: 28,
-		paddingBottom: 20,
-	},
-	headerRow: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		paddingHorizontal: 22,
-		paddingTop: 16,
-	},
-	headerTitle: {
-		color: Colors.white,
-		fontSize: 22,
-		fontWeight: "800",
-	},
-	clearText: {
-		color: Colors.white,
-		fontSize: 13,
-		fontWeight: "700",
-		textDecorationLine: "underline",
 	},
 	list: {
 		padding: 20,

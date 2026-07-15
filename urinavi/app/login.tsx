@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
 	Keyboard,
@@ -48,6 +49,7 @@ export default function LoginScreen() {
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
+			<StatusBar style="dark" />
 			<KeyboardAvoidingView
 				style={styles.flex}
 				behavior={Platform.OS === "ios" ? "padding" : undefined}

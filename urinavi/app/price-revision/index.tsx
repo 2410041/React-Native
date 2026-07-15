@@ -35,6 +35,18 @@ export default function PriceRevisionStartScreen() {
 								価格改定対象の商品リスト（PDF・Excel・CSVを想定）を選択すると、店舗で取り扱いのある商品を自動で照合します。
 							</Text>
 						</View>
+						<View style={styles.scopeNoteCard}>
+							<Ionicons name="information-circle" size={18} color={Colors.primary} />
+							<View style={styles.scopeNoteTextArea}>
+								<Text style={styles.scopeNoteTitle}>対象カテゴリ</Text>
+								<Text style={styles.scopeNoteText}>
+									ドラッグ・雑貨／日配／食品／飲料／菓子が対象です。
+								</Text>
+								<Text style={styles.scopeNoteWarning}>
+									※ 生鮮・総菜は価格改定チェックの対象外です（価格変動・取扱いの変動が大きいため）
+								</Text>
+							</View>
+						</View>
 						<PrimaryButton label="ファイルを選択する" icon="document-attach" onPress={selectPriceRevisionFile} />
 					</>
 				)}
@@ -111,6 +123,34 @@ const styles = StyleSheet.create({
 		color: Colors.textSub,
 		textAlign: "center",
 		lineHeight: 20,
+	},
+	scopeNoteCard: {
+		flexDirection: "row",
+		gap: 10,
+		backgroundColor: Colors.primaryLight,
+		borderRadius: 16,
+		padding: 16,
+		marginBottom: 24,
+	},
+	scopeNoteTextArea: {
+		flex: 1,
+		gap: 4,
+	},
+	scopeNoteTitle: {
+		fontSize: 13,
+		fontWeight: "700",
+		color: Colors.primary,
+	},
+	scopeNoteText: {
+		fontSize: 12,
+		color: Colors.text,
+		lineHeight: 18,
+	},
+	scopeNoteWarning: {
+		fontSize: 12,
+		color: Colors.textSub,
+		lineHeight: 18,
+		marginTop: 2,
 	},
 	fileCard: {
 		flexDirection: "row",

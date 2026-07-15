@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { Redirect, router } from "expo-router";
+import { Href, Redirect, router } from "expo-router";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -17,6 +17,45 @@ function getGreeting(): string {
 	return "お疲れ様です、";
 }
 
+type HomeMenuItem = {
+	id: string;
+	title: string;
+	description: string;
+	icon: keyof typeof Ionicons.glyphMap;
+	route: Href;
+};
+
+const homeMenuItems: HomeMenuItem[] = [
+	{
+		id: "search",
+		title: "商品検索",
+		description: "商品名で探す",
+		icon: "search",
+		route: "/search",
+	},
+	{
+		id: "barcode",
+		title: "バーコード読取",
+		description: "納品・戻し商品の場所確認",
+		icon: "barcode",
+		route: "/barcode",
+	},
+	{
+		id: "map",
+		title: "売場マップ",
+		description: "売場全体を確認",
+		icon: "map",
+		route: "/map/store",
+	},
+	{
+		id: "history",
+		title: "最近見た商品",
+		description: "直前の商品をすぐ確認",
+		icon: "time",
+		route: "/history",
+	},
+];
+
 export default function HomeScreen() {
 	const { employee, store, currentDepartment, isHelpingOtherDepartment, unreadNotificationCount } =
 		useApp();
@@ -32,7 +71,11 @@ export default function HomeScreen() {
 
 	return (
 		<View style={styles.screen}>
-			<LinearGradient colors={Gradients.header} style={styles.header}>
+			<LinearGradient
+				colors={Gradients.header}
+				start={{ x: 0, y: 0 }}
+				end={{ x: 1, y: 1 }}
+				style={styles.header}>
 				<SafeAreaView edges={["top"]}>
 					<View style={styles.headerRow}>
 						<View style={styles.headerTextArea}>
@@ -40,9 +83,12 @@ export default function HomeScreen() {
 							<Text style={styles.employeeName} numberOfLines={1}>
 								{employee.name}さん（{employee.employeeNumber}番）
 							</Text>
-							<Text style={styles.storeName} numberOfLines={1}>
-								{store.name}
-							</Text>
+							<View style={styles.storeRow}>
+								<Ionicons name="storefront" size={13} color={Colors.white} />
+								<Text style={styles.storeName} numberOfLines={1}>
+									{store.name}
+								</Text>
+							</View>
 						</View>
 						<TouchableOpacity
 							style={styles.bellButton}
@@ -50,7 +96,7 @@ export default function HomeScreen() {
 							onPress={() => router.push("/notifications")}
 							accessibilityRole="button"
 							accessibilityLabel="通知一覧を開く">
-							<Ionicons name="notifications-outline" size={24} color={Colors.white} />
+							<Ionicons name="notifications-outline" size={22} color={Colors.white} />
 							{unreadNotificationCount > 0 && (
 								<View style={styles.badge}>
 									<Text style={styles.badgeText}>
@@ -67,54 +113,29 @@ export default function HomeScreen() {
 						onPress={() => router.push("/department")}
 						accessibilityRole="button"
 						accessibilityLabel="担当部門を切り替える">
-						<Ionicons name="pricetag" size={14} color={Colors.white} />
+						<View style={styles.departmentIconWrap}>
+							<Ionicons name="pricetag" size={13} color={Colors.primaryDark} />
+						</View>
 						<Text style={styles.departmentText} numberOfLines={1}>
 							担当部門：{currentDepartmentName}
 							{isHelpingOtherDepartment ? "（応援中）" : ""}
 						</Text>
-						<Ionicons name="chevron-forward" size={14} color={Colors.white} />
+						<Ionicons name="chevron-forward" size={16} color={Colors.primaryDark} />
 					</TouchableOpacity>
 				</SafeAreaView>
 			</LinearGradient>
 
 			<ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 				<View style={styles.cardGrid}>
-					<MenuCard
-						icon="search"
-						title="商品検索"
-						subtitle="商品名で探す"
-						onPress={() => router.push("/search")}
-					/>
-					<MenuCard
-						icon="barcode"
-						title="バーコード読取"
-						subtitle={"納品・戻し商品の\n場所確認"}
-						onPress={() => router.push("/barcode")}
-					/>
-					<MenuCard
-						icon="map"
-						title="売場マップ"
-						subtitle="売場全体を確認"
-						onPress={() => router.push("/map/store")}
-					/>
-					<MenuCard
-						icon="time"
-						title="最近見た商品"
-						subtitle={"直前の商品を\nすぐ確認"}
-						onPress={() => router.push("/history")}
-					/>
-					<MenuCard
-						icon="pricetags"
-						title="価格改定チェック"
-						subtitle={"対象商品の\n取扱いを確認"}
-						onPress={() => router.push("/price-revision")}
-					/>
-					<MenuCard
-						icon="swap-horizontal"
-						title="担当部門切り替え"
-						subtitle={"応援・担当部門を\n変更する"}
-						onPress={() => router.push("/department")}
-					/>
+					{homeMenuItems.map((item) => (
+						<MenuCard
+							key={item.id}
+							icon={item.icon}
+							title={item.title}
+							subtitle={item.description}
+							onPress={() => router.push(item.route)}
+						/>
+					))}
 				</View>
 			</ScrollView>
 
@@ -131,13 +152,18 @@ const styles = StyleSheet.create({
 	header: {
 		borderBottomLeftRadius: 28,
 		borderBottomRightRadius: 28,
+		shadowColor: "#00341A",
+		shadowOpacity: 0.18,
+		shadowRadius: 14,
+		shadowOffset: { width: 0, height: 5 },
+		elevation: 3,
 	},
 	headerRow: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "flex-start",
 		paddingHorizontal: 22,
-		paddingTop: 12,
+		paddingTop: 14,
 		gap: 10,
 	},
 	headerTextArea: {
@@ -145,24 +171,30 @@ const styles = StyleSheet.create({
 	},
 	greeting: {
 		color: Colors.primaryLight,
-		fontSize: 14,
+		fontSize: 13,
 		marginBottom: 4,
 	},
 	employeeName: {
 		color: Colors.white,
-		fontSize: 22,
+		fontSize: 21,
 		fontWeight: "800",
+	},
+	storeRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 4,
+		marginTop: 4,
 	},
 	storeName: {
 		color: Colors.primaryLight,
 		fontSize: 13,
-		marginTop: 2,
+		fontWeight: "600",
 	},
 	bellButton: {
 		width: 40,
 		height: 40,
 		borderRadius: 20,
-		backgroundColor: "rgba(255,255,255,0.18)",
+		backgroundColor: "rgba(255,255,255,0.2)",
 		alignItems: "center",
 		justifyContent: "center",
 	},
@@ -178,7 +210,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		paddingHorizontal: 3,
 		borderWidth: 1.5,
-		borderColor: Colors.primary,
+		borderColor: Colors.white,
 	},
 	badgeText: {
 		fontSize: 10,
@@ -188,19 +220,27 @@ const styles = StyleSheet.create({
 	departmentRow: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
-		backgroundColor: "rgba(255,255,255,0.16)",
+		gap: 8,
+		backgroundColor: Colors.white,
 		marginHorizontal: 22,
 		marginTop: 16,
 		marginBottom: 20,
-		paddingHorizontal: 14,
+		paddingHorizontal: 12,
 		paddingVertical: 10,
-		borderRadius: 12,
+		borderRadius: 14,
 		minHeight: 44,
+	},
+	departmentIconWrap: {
+		width: 24,
+		height: 24,
+		borderRadius: 12,
+		backgroundColor: Colors.primaryLight,
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	departmentText: {
 		flex: 1,
-		color: Colors.white,
+		color: Colors.primaryDark,
 		fontSize: 13,
 		fontWeight: "700",
 	},

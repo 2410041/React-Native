@@ -42,7 +42,7 @@ export default function ProductDetailScreen() {
 
 	return (
 		<View style={styles.screen}>
-			<AppHeader title="商品詳細" />
+			<AppHeader title="商品詳細" subtitle={getDepartmentName(product.departmentCode)} />
 
 			<ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 				<View style={styles.iconWrap}>

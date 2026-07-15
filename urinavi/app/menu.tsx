@@ -1,17 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { Href, router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { Colors, Gradients } from "@/constants/colors";
+import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { getDepartmentName } from "@/data/departments";
 
 const menuItems: { icon: keyof typeof Ionicons.glyphMap; label: string; href: Href }[] = [
+	{ icon: "pricetags-outline", label: "価格改定チェック", href: "/price-revision" },
+	{ icon: "swap-horizontal-outline", label: "担当部門切り替え", href: "/department" },
 	{ icon: "person-circle-outline", label: "従業員情報", href: "/employee" },
 	{ icon: "storefront-outline", label: "店舗情報", href: "/store" },
 	{ icon: "settings-outline", label: "設定", href: "/settings" },
@@ -25,11 +26,7 @@ export default function MenuScreen() {
 
 	return (
 		<View style={styles.screen}>
-			<LinearGradient colors={Gradients.header} style={styles.header}>
-				<SafeAreaView edges={["top"]}>
-					<Text style={styles.headerTitle}>メニュー</Text>
-				</SafeAreaView>
-			</LinearGradient>
+			<AppHeader title="メニュー" showBack={false} />
 
 			<View style={styles.content}>
 				<View style={styles.profileCard}>
@@ -95,18 +92,6 @@ const styles = StyleSheet.create({
 	screen: {
 		flex: 1,
 		backgroundColor: Colors.background,
-	},
-	header: {
-		borderBottomLeftRadius: 28,
-		borderBottomRightRadius: 28,
-		paddingBottom: 20,
-	},
-	headerTitle: {
-		color: Colors.white,
-		fontSize: 22,
-		fontWeight: "800",
-		paddingHorizontal: 22,
-		paddingTop: 16,
 	},
 	content: {
 		flex: 1,

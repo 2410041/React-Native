@@ -20,7 +20,7 @@ export default function MapScreen() {
 
 	return (
 		<View style={styles.screen}>
-			<AppHeader title="商品の場所案内" />
+			<AppHeader title="商品の場所案内" subtitle={product.name} />
 
 			<ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 				<Text style={styles.name}>{product.name}</Text>
