@@ -4,14 +4,14 @@ import { Store } from "@/types/store";
 
 export const currentStore: Store = {
 	id: "asuka",
-	name: "明日香店",
+	name: "飛鳥店",
 };
 
 export const mockEmployee: Employee = {
 	employeeNumber: 67,
 	name: "山口",
 	storeId: "asuka",
-	storeName: "明日香店",
+	storeName: "飛鳥店",
 };
 
 export const mockProducts: Product[] = [
