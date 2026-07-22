@@ -10,7 +10,9 @@ cp .env.example .env   # 必要に応じてVITE_API_BASE_URLを変更
 npm run dev             # http://localhost:5173
 ```
 
-APIサーバー（[`../api`](../api)）を別ターミナルで先に起動しておくこと。開発時は`vite.config.ts`のproxy設定により`/api/**`が`http://localhost:4000`へ転送される。
+APIサーバー（[`../api`](../api)）を別ターミナルで先に起動しておくこと。開発時は`vite.config.ts`のproxy設定により`/api/**`が`http://localhost:4000`（Docker Compose環境では`VITE_API_PROXY_TARGET`で`api`コンテナ）へ転送される。
+
+MySQL込みで一括起動したい場合はリポジトリルートの[Docker開発環境の手順](../README.md#25-ローカルdocker開発環境)を参照。
 
 QRコードなしで動作確認したい場合は、`.env`に以下を設定するとトップページ（`/`）から自動的に既定店舗へリダイレクトする。
 
@@ -52,6 +54,3 @@ npm run preview   # ビルド成果物をローカル確認
 - [ ] 375px（スマホ）、768px（タブレット）、1280px（PC）で崩れない
 - [ ] `npm run build`後、`npm run preview`でPWAとしてインストール可能なこと・オフラインでも`index.html`のnavigationが機能すること
 
-## 実行環境に関する注意
-
-このワークスペースには Node.js / npm がインストールされていないため、このセッションでは `npm install` / `npm run dev` / `npm run build` / `npm run lint` を実行して検証できていない。ローカルでNode.js（18以降推奨）を用意したうえで、上記コマンドと手動確認チェックリストを実行すること。

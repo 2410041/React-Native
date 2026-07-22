@@ -50,12 +50,19 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
     port: 5173,
+    // Docker Compose上ではコンテナ名(api)、ホスト直起動ではlocalhostへプロキシする。
     proxy: {
       "/api": {
-        target: "http://localhost:4000",
+        target: process.env.VITE_API_PROXY_TARGET || "http://localhost:4000",
         changeOrigin: true,
       },
+    },
+    watch: {
+      // Docker(特にWindows/macOSのbind mount)ではネイティブのファイル監視イベントが
+      // 届かないことがあるため、ポーリングで確実にHMRを効かせる。
+      usePolling: true,
     },
   },
 });

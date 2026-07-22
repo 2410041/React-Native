@@ -1,0 +1,13 @@
+# 開発用Dockerfile。本番ビルドは対象外（本番はvite buildの成果物をapiから静的配信する運用）。
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]

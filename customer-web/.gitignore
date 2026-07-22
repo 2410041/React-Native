@@ -4,3 +4,8 @@ dist-ssr
 *.local
 .env
 .env.local
+
+# tsc -b (composite) が vite.config.ts と同じ場所に出力するビルド成果物
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo

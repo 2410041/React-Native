@@ -51,7 +51,9 @@ export function StoreMapPage() {
       <h1 className="page-title">店内マップ</h1>
       {product ? (
         <p className="page-subtitle">
-          「{product.name}」は {product.location.aisleNumber}番通路・{product.location.sectionName}
+          「{product.name}」は{" "}
+          {product.location.aisleNumber !== null ? `${product.location.aisleNumber}番通路・` : ""}
+          {product.location.sectionName}
           （{product.location.landmark}）付近です。
         </p>
       ) : (

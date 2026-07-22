@@ -7,6 +7,6 @@ const toneByCode: Record<ProductStatus["code"], "success" | "warning" | "neutral
 };
 
 export function StatusBadge({ status }: { status: ProductStatus }) {
-  const tone = toneByCode[status.code];
-  return <span className={`status-badge tone-${tone}`}>{status.label}</span>;
+  const tone = toneByCode[status.code] ?? "neutral";
+  return <span className={`status-badge tone-${tone}`}>{status.label ?? "状態不明"}</span>;
 }

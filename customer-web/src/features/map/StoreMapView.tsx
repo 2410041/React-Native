@@ -5,7 +5,7 @@ export function StoreMapView({
   highlightAisleNumber,
 }: {
   map: StoreMap;
-  highlightAisleNumber?: number;
+  highlightAisleNumber?: number | null;
 }) {
   return (
     <svg

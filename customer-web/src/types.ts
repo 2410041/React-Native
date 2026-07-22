@@ -22,12 +22,13 @@ export type ProductSummary = {
   id: string;
   name: string;
   janCode?: string;
-  category: Category;
+  // APIによってはカテゴリを含めない/削除済みカテゴリでnullを返すことがあるため欠損を許容する
+  category: Category | null;
   status: ProductStatus;
 };
 
 export type ProductLocation = {
-  aisleNumber: number;
+  aisleNumber: number | null;
   sectionName: string;
   landmark: string;
   nearbyProducts: string[];
@@ -38,7 +39,7 @@ export type ProductDetail = {
   storeId: string;
   janCode: string;
   name: string;
-  category: Category;
+  category: Category | null;
   location: ProductLocation;
   status: ProductStatus;
   updatedAt: string;

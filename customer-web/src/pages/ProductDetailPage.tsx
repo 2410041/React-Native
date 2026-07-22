@@ -74,14 +74,16 @@ export function ProductDetailPage() {
       <div className="product-detail-card">
         <StatusBadge status={product.status} />
         <h1 className="product-detail-name">{product.name}</h1>
-        <p className="product-card-category">{product.category.name}</p>
+        <p className="product-card-category">{product.category?.name ?? "カテゴリ不明"}</p>
 
         <p className="product-detail-message">{product.status.message}</p>
 
         <div className="location-grid">
           <div>
             <div className="location-item-label">通路番号</div>
-            <div className="location-item-value">{product.location.aisleNumber}番通路</div>
+            <div className="location-item-value">
+              {product.location.aisleNumber !== null ? `${product.location.aisleNumber}番通路` : "通路番号なし"}
+            </div>
           </div>
           <div>
             <div className="location-item-label">売場名</div>

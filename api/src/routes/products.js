@@ -1,53 +1,140 @@
 const express = require("express");
-const { getProductById, searchProducts } = require("../data/products");
-const { getStoreById } = require("../data/stores");
-const { getCategoryById } = require("../data/categories");
+const { pool } = require("../db/pool");
 const { getProductDisplayStatus } = require("../data/productStatus");
+const { asyncHandler } = require("../utils/asyncHandler");
 
 const router = express.Router();
 
-function serializeProduct(p) {
-	return {
-		id: p.id,
-		storeId: p.storeId,
-		janCode: p.janCode,
-		name: p.name,
-		category: getCategoryById(p.categoryId),
-		location: p.location,
-		status: getProductDisplayStatus(p.handlingStatus),
-		updatedAt: p.updatedAt,
-	};
+async function loadCategoriesByIds(ids) {
+	const uniqueIds = [...new Set(ids)].filter(Boolean);
+	if (uniqueIds.length === 0) {
+		return new Map();
+	}
+	const [rows] = await pool.query("SELECT id, name FROM categories WHERE id IN (?)", [uniqueIds]);
+	return new Map(rows.map((r) => [r.id, { id: r.id, name: r.name }]));
 }
 
-router.get("/search", (req, res) => {
-	const { keyword = "", storeId, categoryId } = req.query;
-	if (!storeId) {
-		return res.status(400).json({ error: "store_id_required" });
+function parseNearbyProducts(value) {
+	if (Array.isArray(value)) return value;
+	if (typeof value === "string") {
+		try {
+			return JSON.parse(value);
+		} catch {
+			return [];
+		}
 	}
-	const store = getStoreById(storeId);
-	if (!store) {
-		return res.status(404).json({ error: "store_not_found" });
-	}
-	const results = searchProducts({ keyword: String(keyword), storeId: String(storeId), categoryId: categoryId ? String(categoryId) : undefined });
-	return res.json({
-		keyword: String(keyword),
-		products: results.map((p) => ({
-			id: p.id,
-			name: p.name,
-			janCode: p.janCode,
-			category: getCategoryById(p.categoryId),
-			status: getProductDisplayStatus(p.handlingStatus),
-		})),
-	});
-});
+	return [];
+}
 
-router.get("/:productId", (req, res) => {
-	const { storeId } = req.query;
-	const product = getProductById(req.params.productId);
-	if (!product || (storeId && product.storeId !== storeId)) {
-		return res.status(404).json({ error: "product_not_found" });
-	}
-	return res.json(serializeProduct(product));
-});
+router.get(
+	"/search",
+	asyncHandler(async (req, res) => {
+		const { keyword = "", storeId, categoryId } = req.query;
+		if (!storeId) {
+			return res.status(400).json({ error: "store_id_required" });
+		}
+		const [storeRows] = await pool.query("SELECT id FROM stores WHERE id = ? AND status = 'active' LIMIT 1", [
+			storeId,
+		]);
+		if (storeRows.length === 0) {
+			return res.status(404).json({ error: "store_not_found" });
+		}
+
+		const trimmedKeyword = String(keyword).trim();
+		const conditions = ["pl.store_id = ?"];
+		const params = [storeId];
+
+		if (categoryId && categoryId !== "all") {
+			conditions.push("p.category_id = ?");
+			params.push(String(categoryId));
+		}
+		if (trimmedKeyword) {
+			if (/^\d+$/.test(trimmedKeyword)) {
+				conditions.push("p.jan_code LIKE ?");
+				params.push(`%${trimmedKeyword}%`);
+			} else {
+				conditions.push("p.name LIKE ?");
+				params.push(`%${trimmedKeyword}%`);
+			}
+		}
+
+		const [rows] = await pool.query(
+			`SELECT p.id, p.name, p.jan_code AS janCode, p.category_id AS categoryId, pl.handling_status AS handlingStatus
+			 FROM product_locations pl
+			 JOIN products p ON p.id = pl.product_id
+			 WHERE ${conditions.join(" AND ")}
+			 ORDER BY p.id`,
+			params
+		);
+
+		const categories = await loadCategoriesByIds(rows.map((r) => r.categoryId));
+
+		return res.json({
+			keyword: String(keyword),
+			products: rows.map((r) => ({
+				id: String(r.id),
+				name: r.name,
+				janCode: r.janCode,
+				category: categories.get(r.categoryId) ?? null,
+				status: getProductDisplayStatus(r.handlingStatus),
+			})),
+		});
+	})
+);
+
+router.get(
+	"/:productId",
+	asyncHandler(async (req, res) => {
+		const { storeId } = req.query;
+		const productId = Number(req.params.productId);
+		if (!Number.isInteger(productId)) {
+			return res.status(404).json({ error: "product_not_found" });
+		}
+
+		const conditions = ["p.id = ?"];
+		const params = [productId];
+		if (storeId) {
+			conditions.push("pl.store_id = ?");
+			params.push(String(storeId));
+		}
+
+		const [rows] = await pool.query(
+			`SELECT p.id, p.jan_code AS janCode, p.name, p.category_id AS categoryId,
+			        pl.store_id AS storeId, a.aisle_number AS aisleNumber,
+			        pl.area_name AS sectionName, pl.landmark, pl.nearby_products AS nearbyProducts,
+			        pl.handling_status AS handlingStatus, pl.updated_at AS updatedAt
+			 FROM product_locations pl
+			 JOIN products p ON p.id = pl.product_id
+			 LEFT JOIN aisles a ON a.id = pl.aisle_id
+			 WHERE ${conditions.join(" AND ")}
+			 LIMIT 1`,
+			params
+		);
+
+		if (rows.length === 0) {
+			return res.status(404).json({ error: "product_not_found" });
+		}
+		const row = rows[0];
+		const [categoryRows] = await pool.query("SELECT id, name FROM categories WHERE id = ? LIMIT 1", [
+			row.categoryId,
+		]);
+
+		return res.json({
+			id: String(row.id),
+			storeId: row.storeId,
+			janCode: row.janCode,
+			name: row.name,
+			category: categoryRows[0] ?? null,
+			location: {
+				aisleNumber: row.aisleNumber !== null ? Number(row.aisleNumber) : null,
+				sectionName: row.sectionName,
+				landmark: row.landmark,
+				nearbyProducts: parseNearbyProducts(row.nearbyProducts),
+			},
+			status: getProductDisplayStatus(row.handlingStatus),
+			updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
+		});
+	})
+);
 
 module.exports = router;
